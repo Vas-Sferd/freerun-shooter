@@ -14,6 +14,9 @@ data = PoolVector3Array( 179.037, 12.8, -7.68, 153.6, 12.8, -7.68, 179.037, -0.0
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -7 )
 script = ExtResource( 3 )
 
+[node name="jump_pad" parent="." instance=ExtResource( 4 )]
+transform = Transform( 1, 0, 0, 0, 0.99986, -0.0167194, 0, 0.0167194, 0.99986, 18.8358, 0.894855, -1.48711 )
+
 [node name="sun" type="DirectionalLight" parent="."]
 transform = Transform( -0.707107, 0.353553, -0.612373, 2.18557e-08, 0.866026, 0.499999, 0.707107, 0.353553, -0.612373, 0, 47, 0 )
 light_energy = 0.75
@@ -35,18 +38,7 @@ material/0 = ExtResource( 1 )
 [node name="StaticBody" type="StaticBody" parent="map"]
 
 [node name="CollisionShape" type="CollisionShape" parent="map/StaticBody"]
-visible = false
 shape = SubResource( 1 )
-
-[node name="jump_pad" parent="." instance=ExtResource( 4 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 12, -6 )
-force = 30
-
-[node name="jump_pad2" parent="." instance=ExtResource( 4 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 80, 0.5, -22 )
-
-[node name="jump_pad3" parent="." instance=ExtResource( 4 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -71, 0.5, 38 )
 
 [node name="spawnpoints" type="Spatial" parent="."]
 
