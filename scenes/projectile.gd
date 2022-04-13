@@ -6,42 +6,75 @@ var velocity:Vector3
 var start_time:int
 var damage:float
 var scale_modifier:float
+var owner_id:int = 0
 
 
-func init(start_trans:Transform, accel:Vector3, vel:Vector3, dam:float, time:int):
+func init(start_trans:Transform, accel:Vector3, vel:Vector3, scale_modifier:float, dam:float, color:Color, time:int, own:int):
 	global_transform = start_trans
 	start_pos = start_trans.origin
 	acceleration = accel
 	velocity = vel
 	damage = dam
-	scale.x = 1 + damage/50
-	scale.y = 1 + damage/50
-	scale.z = 1 + damage/50
+	$MeshInstance.get("material/0").albedo_color = color
+	scale.x = damage/15
+	scale.y = damage/15
+	scale.z = damage/15
+	scale *= scale_modifier
 	start_time = time
-	var diff = OS.get_system_time_msecs() - start_time
-	diff /= 16.66667
-	global_transform.origin = start_pos + velocity * diff + acceleration * (diff * diff)
+	owner_id = own
+#	var diff = OS.get_system_time_msecs() - start_time
+#	diff = 0
+#	print(diff)
+#	diff /= 16.66667
+#	diff*=-1 #TODO Разобраться почему нужно умножать на -1
+#	global_transform.origin = start_pos + velocity * diff + acceleration * (diff * diff)
+#
+#	velocity -= acceleration * diff
 	
-	velocity -= acceleration * diff
-	print("created")
+	#TODO delete this
+#	var test_point = preload("res://testing_point.tscn").instance()
+#	test_point.global_transform.origin = start_trans.origin
+#	Multiplayer.world.add_child(test_point)
+#
+#	var test_point2 = preload("res://testing_point.tscn").instance()
+#	test_point2.global_transform.origin = global_transform.origin
+#	Multiplayer.world.add_child(test_point2)
 	
 
-func _process(delta):
+func _physics_process(delta):
+	look_at(global_transform.origin + velocity, Vector3.UP)
+	$RayCast.cast_to = Vector3(0,0,-1) * velocity.length()
+	$RayCast.force_update_transform()
+	$RayCast.force_raycast_update()
+	var test = $RayCast.get_collider()
+	
+	if test is PhysicsBody:
+		if $RayCast.get_collision_point().distance_squared_to(global_transform.origin) < 5:
+			_on_Area_body_entered(test)
+	if test is Area:
+		#print("collided with" + test.name)
+		_on_Area_area_entered(test)
+	if test == null:
+		pass
+		
+		#print("null")
+	
 	global_transform.origin += velocity
 	velocity-=acceleration
 
+
 func _on_Area_body_entered(body):
+	if body.is_in_group("friend"):
+		return
 	queue_free()
-	print("collided with " + body.name)
 
 func _on_Area_area_entered(area):
-	if area.is_in_group("projectile"):
+	if owner_id != get_tree().get_network_unique_id():
 		return
-	
-	if area.name == "enemy":
-		get_parent().damage(damage)
-	queue_free()
-	print("collided with area")
+	if area.is_in_group("enemy"):
+		Multiplayer.damage(damage)
+		Multiplayer.player.hit_marker()
+		queue_free()
 
 
 func _on_Timer_timeout():
